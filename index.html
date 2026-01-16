@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English 5 Speaking</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&family=Pangolin&display=swap" rel="stylesheet">
+
+<style>
+:root{
+ --primary:#4A90E2;
+ --secondary:#6C5CE7;
+ --accent:#27AE60;
+ --error:#FF7F50;
+ --bg:#F4F8FB;
+ --gold:#F1C40F;
+}
+
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ background:var(--bg);
+ font-family:'Lexend',sans-serif;
+}
+
+.container{
+ max-width:1000px;
+ margin:auto;
+ padding:16px;
+}
+
+h1{
+ text-align:center;
+ font-family:'Pangolin',cursive;
+ color:var(--primary);
+ font-size:2.8rem;
+}
+
+.mode-switch{
+ display:flex;
+ gap:10px;
+ background:#eaf1f8;
+ padding:8px;
+ border-radius:40px;
+}
+
+.mode-btn{
+ flex:1;
+ padding:14px;
+ border:none;
+ border-radius:40px;
+ font-weight:bold;
+ cursor:pointer;
+ background:transparent;
+}
+
+.mode-btn.active{
+ background:var(--primary);
+ color:white;
+}
+
+.input-bar{
+ display:grid;
+ gap:12px;
+ margin:20px 0;
+}
+
+@media(min-width:600px){
+ .input-bar{grid-template-columns:1fr 1fr;}
+}
+
+input,select,textarea{
+ width:100%;
+ padding:14px;
+ border-radius:18px;
+ border:2px solid #dfe6ee;
+ font-size:1rem;
+}
+
+.card{
+ background:white;
+ padding:20px;
+ border-radius:24px;
+ margin-bottom:20px;
+}
+
+.sample{
+ background:#f9fbff;
+ border-left:6px solid var(--accent);
+ padding:16px;
+ border-radius:14px;
+ line-height:1.7;
+}
+
+button{
+ width:100%;
+ padding:16px;
+ border-radius:40px;
+ border:none;
+ font-size:1.2rem;
+ font-weight:bold;
+ cursor:pointer;
+}
+
+.record{
+ background:linear-gradient(135deg,var(--primary),var(--secondary));
+ color:white;
+}
+
+.listen{
+ margin-top:10px;
+ background:white;
+ border:2px solid var(--primary);
+ color:var(--primary);
+}
+
+.correct{color:var(--accent);font-weight:bold}
+.fix{color:var(--error);font-weight:bold;text-decoration:underline;cursor:pointer}
+
+#cert{
+ display:none;
+ background:#fffdf5;
+ border:10px solid #fdcb6e;
+ padding:30px;
+ border-radius:20px;
+ text-align:center;
+}
+
+.cert-name{
+ font-family:'Pangolin',cursive;
+ font-size:2.4rem;
+ color:var(--secondary);
+ border-bottom:3px solid #ccc;
+ display:inline-block;
+ padding:0 20px;
+ margin:20px 0;
+}
+
+.stars{font-size:3rem;color:var(--gold)}
+
+.footer{
+ display:flex;
+ justify-content:space-around;
+ margin-top:40px;
+ flex-wrap:wrap;
+ gap:20px;
+}
+
+.signature{
+ border-top:2px solid #999;
+ padding-top:8px;
+ font-family:'Pangolin',cursive;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>English 5 Speaking</h1>
+
+<div class="mode-switch">
+ <button id="btnUnit" class="mode-btn active" onclick="setMode('unit')">Theo Unit</button>
+ <button id="btnFree" class="mode-btn" onclick="setMode('free')">Free Speaking</button>
+</div>
+
+<div class="input-bar">
+ <input id="nameInp" placeholder="Tên học sinh">
+ <input id="classInp" placeholder="Lớp (VD: 5/3)">
+</div>
+
+<div id="unitSection" class="card">
+ <select id="unitSel"></select>
+ <div id="sampleTxt" class="sample"></div>
+ <button class="listen" onclick="playVoice(sampleTxt.innerText)">🔊 Nghe bài mẫu</button>
+</div>
+
+<div id="freeSection" class="card" style="display:none">
+ <div class="sample">Con hãy nói tự do. Cô AI sẽ sửa câu cho đúng.</div>
+</div>
+
+<div class="card">
+ <textarea id="output" rows="3" placeholder="Lời con nói sẽ hiện ở đây..."></textarea>
+ <button id="recBtn" class="record" onclick="startRec()">🎙️ BẮT ĐẦU NÓI</button>
+</div>
+
+<div class="card">
+ <b>🤖 Nhận xét:</b>
+ <div id="feedback">Đang chờ con nói…</div>
+</div>
+
+<div id="cert">
+ <h2>CERTIFICATE</h2>
+ <p>This certificate is presented to</p>
+ <div id="cName" class="cert-name"></div>
+ <p>Lớp: <span id="cClass"></span></p>
+ <h3 id="cUnit"></h3>
+ <div id="cStars" class="stars"></div>
+ <div class="footer">
+  <div class="signature">Mrs Tran Thi Kim Yen</div>
+  <div class="signature">Mrs Pham Thi Ngoc Bich</div>
+ </div>
+</div>
+
+</div>
+
+<script>
+const lessons={
+1:"I’m Hoang. I’m in class 5/3. I live in the countryside. My favourite colour is yellow. My favourite animal is a dolphin.",
+2:"Do you live in this house? Yes, I do. I live in a flat. It is in the city.",
+3:"What nationality is he? He is Vietnamese. She is friendly and helpful.",
+4:"What do you like doing in your free time? I like playing the violin and reading books.",
+5:"What would you like to be in the future? I want to be a teacher because I want to teach children.",
+6:"Where is the art room? It is on the second floor. Go upstairs and turn right.",
+7:"What school activity does she like? She likes doing projects because it is interesting.",
+8:"Where are the crayons? They are on the table. Whose pen is this? It’s mine.",
+9:"Were you at the campsite yesterday? Yes, we were. We danced around the campfire.",
+10:"Did they go to Ba Na Hills? Yes, they did. They took many photos.",
+11:"Did you swim? Yes, I did. I swam with my family.",
+12:"What will you do at Tet? I will visit my grandparents and get lucky money.",
+13:"What will you do on Children’s Day? We will sing and dance.",
+14:"How does she stay healthy? She does exercise and eats healthy food.",
+15:"What’s the matter? I have a sore throat. You should drink warm water.",
+16:"What’s the weather like in summer? It is hot and sunny.",
+17:"Who are the main characters? They are the fox and the crow.",
+18:"How can I get there? You can get there by bus.",
+19:"What do you think of Hoi An? I think it is beautiful and peaceful.",
+20:"Where are you going this summer? I am going to visit Phong Nha Cave."
+};
+
+const unitSel=document.getElementById("unitSel");
+const sampleTxt=document.getElementById("sampleTxt");
+const feedback=document.getElementById("feedback");
+
+for(let i=1;i<=20;i++){
+ unitSel.innerHTML+=`<option value="${i}">Unit ${i}</option>`;
+}
+
+unitSel.onchange=()=>sampleTxt.innerText=lessons[unitSel.value];
+sampleTxt.innerText=lessons[1];
+
+function setMode(m){
+ btnUnit.classList.toggle("active",m==="unit");
+ btnFree.classList.toggle("active",m==="free");
+ unitSection.style.display=m==="unit"?"block":"none";
+ freeSection.style.display=m==="free"?"block":"none";
+}
+
+function playVoice(text){
+ speechSynthesis.cancel();
+ let u=new SpeechSynthesisUtterance(text);
+ u.lang="en-GB";
+ u.rate=0.9;
+ speechSynthesis.speak(u);
+}
+
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const rec=new SR();
+rec.lang="en-US";
+
+function startRec(){
+ rec.start();
+ recBtn.innerText="🎧 ĐANG NGHE…";
+}
+
+rec.onresult=e=>{
+ let said=e.results[0][0].transcript;
+ output.value=said;
+ recBtn.innerText="🎙️ BẮT ĐẦU NÓI";
+ analyze(said);
+};
+
+function analyze(said){
+ let s=lessons[unitSel.value].toLowerCase().split(" ");
+ let i=said.toLowerCase().split(" ");
+ let html="",mist=0;
+
+ s.forEach(w=>{
+  if(i.includes(w)) html+=`<span class="correct">${w}</span> `;
+  else{html+=`<span class="fix" onclick="playVoice('${w}')">${w}</span> `;mist++;}
+ });
+
+ feedback.innerHTML=html;
+ showCert(mist===0?5:4);
+}
+
+function showCert(stars){
+ cName.innerText=nameInp.value||"Student";
+ cClass.innerText=classInp.value||"5/…";
+ cUnit.innerText="Unit "+unitSel.value;
+ cStars.innerText="⭐".repeat(stars);
+ cert.style.display="block";
+}
+</script>
+</body>
+</html>
